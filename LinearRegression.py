@@ -5,24 +5,24 @@ x_w1 = np.c_[np.ones((len(x), 1)), x]
 y = np.array([2.5, 3.4, 1.8, 4.5, 3.2, 1.6])
 y.shape += (1,)
 
-def hypothesis(theta):
-    return np.dot(x_w1, theta)
+def hypothesis(x, y, theta):
+    return np.dot(x, theta)
 
 def gradient(x, y, theta, m):
-    h = hypothesis(theta)
+    h = hypothesis(x, y, theta)
     grad = np.dot(x.T, (h - y))
     
     return grad
 
 def cost_cal(x, y, theta):
-    h = hypothesis(theta)
+    h = hypothesis(x, y, theta)
     cost = np.sum(np.square(h - y))
     
     return cost
 
 def stochastic_learning(x, y, theta, m):
     epochs = 50
-    rate = 0.001
+    rate = 0.00001
     
     for epoch in range(epochs):
         for i in range(m):
@@ -33,26 +33,51 @@ def stochastic_learning(x, y, theta, m):
             theta = theta - (rate * gradient(x_i, y_i, theta, m))
             cost = cost_cal(x_i, y_i, theta)
             
-    print("------STOCHASTIC LEARNING------")
-    print('Theta:\n{}'.format(theta))
-    print('Cost: {}'.format(cost))
+    print("\n------STOCHASTIC LEARNING------")
+    print('Theta:\n\n{}'.format(theta))
+    print('\nCost:\n\n{}'.format(cost))
             
 def batch_learning(x, y, theta, n, m):
     epochs = 100
     rate = 0.00001
     
-    print("------BATCH LEARNING------")
+    print("\n------BATCH LEARNING------")
     for i in range(epochs):
         theta = theta - (rate * (1 / n) * gradient(x, y, theta, m))
         cost = (1 / (2 * n)) * cost_cal(x, y, theta)
         
-    print('Theta:')
-    print("\n{}".format(theta))
-    print('Cost: {}'.format(cost))
+    print("Theta:\n\n{}".format(theta))
+    print('\nCost:\n\n{}'.format(cost))
 
-# mini_batch_learning():
+def minibatch_learning(x, y, theta, m):
+    epochs = 100
+    minibatch_size = 2
+    rate = 0.00001
     
+    for epoch in range(epochs):
+        shuffled_features = np.random.permutation(m)
+        x_shuffled = x[shuffled_features]
+        y_shuffled = y[shuffled_features]
+        
+        for i in range(0, m, minibatch_size):
+            x_i = x_shuffled[i:i+minibatch_size]
+            y_i = y_shuffled[i:i+minibatch_size]
+            
+            theta = theta - (rate * (2 / minibatch_size) * gradient(x_i, y_i, theta, m))
+            cost = (1 / minibatch_size) * cost_cal(x_i, y_i, theta)
+    
+    print("\n------MINIBATCH LEARNING------")
+    print("Theta:\n\n{}".format(theta))
+    print("\nCost:\n\n{}".format(cost))
 
+def normal_equation(x, y, theta):
+    theta = np.linalg.inv(x.T.dot(x))
+    theta = theta.dot(x.T)
+    theta = theta.dot(y)
+    
+    print("\n------Normal equation------")
+    print("Theta:\n\n{}".format(theta))
+    
 def gradient_descent(x, y):
     
     m = x.shape[1]
@@ -61,5 +86,7 @@ def gradient_descent(x, y):
     
     batch_learning(x, y, theta, n, m)
     stochastic_learning(x, y, theta, m)
+    minibatch_learning(x, y, theta, m)
+    normal_equation(x, y, theta)
     
 gradient_descent(x_w1, y)
